@@ -1,0 +1,60 @@
+Like to solve complex problems.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Have difficulty understanding abstract ideas.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Need things explained only once.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Can handle a lot of information.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Try to avoid complex people.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Love to think up new ways of doing things.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Avoid difficult reading material.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Avoid philosophical discussions.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Am quick to understand things.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
+Love to read challenging material.
+1. Very inaccurate
+2. Moderately inaccurate
+3. Neither accurate nor inaccurate
+4. Moderately accurate
+5. Very accurate
