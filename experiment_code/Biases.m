@@ -11,6 +11,7 @@ classdef Biases < handle
         interTrialTime; %ITI function
         width; %screen width
         height; %screen height
+        flickerI; %flicker fusion images
         text; % text writer
         quest; %questions
         refkeys = [KbName('1!') KbName('2@') KbName('3#') KbName('4$') KbName('5%') KbName('6^') KbName('7&') KbName('8*') KbName('9(')];
@@ -436,9 +437,9 @@ classdef Biases < handle
             obj.text.initialize(obj.w);
             
             if color_convert == 1
-                convert_images();
+                convert_images(); %convert images for flicker text writer
                 [obj.colors, obj.hz] = obj.flickerfusion;
-                undo_convert_images();
+                undo_convert_images(); %unconvert images 
                 
                 convert_images(obj.colors);
                 % text writer write over
@@ -2334,6 +2335,8 @@ classdef Biases < handle
             width  = obj.width;
             height = obj.height;
             text = obj.text;
+            flicker_text = TextWriter;
+            flicker_text.initialize(obj.w);
             refy = round(2*obj.height/5);
             y = refy;
             set = 1;
@@ -2359,12 +2362,20 @@ classdef Biases < handle
             center = [rect(3)/2-200, rect(4)/2-200,rect(3)/2+200,rect(4)/2+200];
             
             
-            tstring = sprintf('You will be presented with eight colors. Look at the center of the circle on the screen. If the color appears to flicker, please press the left and right arrow keys until you see less / no flickering. Please tell us if you can''t seem to remove the flicker. Once done with a color please press the spacebar. Press a to restart the color you are on. Press the spacebar to begin.');
-            text.drawWrappedText(tstring,[],y + text.lineh(set)*(-1),set,'center');
+            instr_string1 = sprintf('In this task, you will adjust the colors for the rest of the experiment. You will be presented with eight colors.');
+            instr_string2 = sprintf('Look at the center of the circle on the screen. If the color appears to flicker, please press the left and right arrow keys until you see no (or only slight) flickering.  Once done with a color please press the spacebar.');
+            instr_string3 = sprintf('The initial colors were chosen such that they may already have little to no flickering. You can press "a" to restart the color you are on. Please tell us if you can''t seem to remove the flicker.');
+            instr_string4 = sprintf('Press the spacebar to begin.');
+            [x,y] = text.drawWrappedText(instr_string1,[],y + text.lineh(set)*(-2),set,'center');
+            [x,y] = text.drawWrappedText(instr_string2,[],y+100,set,'center');
+            [x,y] = text.drawWrappedText(instr_string3,[],y+100,set,'center');
+            [x,y] = text.drawWrappedText(instr_string4,[],y+100,set,'center');
+            
             Screen('Flip',obj.w);
             key = Utilities.waitForInput([KbName('space')], inf);
             WaitSecs(0.2);
-            for color = 1:size(final_colors,1)
+            color = 1;
+            while color < size(final_colors,1)+1
                 color2 = colors(color,:);
                 col_idx = col_idx_vec(color);
 
@@ -2372,8 +2383,8 @@ classdef Biases < handle
                 tstring = sprintf('Color %d', color);
                 tstring1 = 'Please press the spacebar to start.';
 
-                text.drawWrappedText(tstring,[],y,set,'center');
-                text.drawWrappedText(tstring1,[],y + text.lineh(set),set,'center');
+                text.drawWrappedText(tstring,[],refy,set,'center');
+                text.drawWrappedText(tstring1,[],refy + text.lineh(set),set,'center');
                     
                 Screen('Flip',obj.w);
                 WaitSecs(0.2);
@@ -2416,6 +2427,80 @@ classdef Biases < handle
                     end
                 end
                 end
+                %adjust text writer
+                flicker_text = TextWriter(color2);
+                flicker_text.initialize(obj.w);
+                
+                mid_string1 = sprintf('Can you read this text?');
+                mid_string2 = sprintf('Press the right arrow to move on if so.');
+                mid_string3 = sprintf('Press the left arrow if you cannot read the text above. You will have another chance to adjust the colors.');
+                mid_string4 = sprintf('Remember, you can press "a" to restart when adjusting a color. If you are having problems with one color in particular, please tell the experimenter.');
+                
+                [x,y] = flicker_text.drawWrappedText(mid_string1,[],refy + flicker_text.lineh(set)*(-2),set+1,'center');
+                [x,y] = flicker_text.drawWrappedText(mid_string2,[],y+100,set+1,'center');
+                [x,y] = text.drawWrappedText(mid_string3,[],y+100,set,'center');
+                [x,y] = text.drawWrappedText(mid_string4,[],y+100,set,'center');
+
+                
+                
+                Screen('Flip',obj.w);
+                WaitSecs(0.5);
+                done = 0
+                while ~done
+                    [ keyIsDown, seconds, keyCode ] = KbCheck;
+                    if keyIsDown
+                        if keyCode(keys(1))
+                            color = color + 1;
+                            done=1;
+                        elseif keyCode(keys(2))
+                            done = 1;
+                        end
+                    end
+                end
+                
+                if color == size(final_colors,1)+1
+                
+                    %load balls for flicker fusion check
+                    files=dir('Images/Ball0*.png');
+                    for i=1:length(files)
+                        name=files(i).name;
+                        [img , ~, alpha] = imread(['Images/' name]); 
+                        img(:,:,4)=alpha;
+                        obj.flickerI.ballsz(i,1)=size(img,2); %width
+                        obj.flickerI.ballsz(i,2)=size(img,1); %height
+                        obj.flickerI.balltxtr(i)=Screen('MakeTexture', obj.w, img);
+                    end
+                    
+                    mid_string1 = sprintf('How many colors do you see below?');
+                    mid_string2 = sprintf('Press the right arrow if you can see five colors.');
+                    mid_string3 = sprintf('Press the left arrow if you see less than five colors. You will adjust all of the colors again. If you have already readjusted the colors please tell the experimenter.');
+
+                    [x,y] = flicker_text.drawWrappedText(mid_string1,[],refy + flicker_text.lineh(set)*(-4),set+1,'center');
+                    [x,y] = flicker_text.drawWrappedText(mid_string2,[],y+100,set+1,'center');
+                    [x,y] = flicker_text.drawWrappedText(mid_string3,[],y+100,set,'center');
+                    
+                    y=y+100; 
+                    for i=1:length(files)
+                        x = round(obj.width/2)+(i-3)*(obj.flickerI.ballsz(1,1)+50);
+                        Screen('DrawTexture', obj.w, obj.flickerI.balltxtr(i), [], [x y x+obj.flickerI.ballsz(i,1) y+obj.flickerI.ballsz(i,2)]);
+                    end
+                    Screen('Flip',obj.w);
+                    WaitSecs(0.5);
+                    done = 0
+                    while ~done
+                        [ keyIsDown, seconds, keyCode ] = KbCheck;
+                        if keyIsDown
+                            if keyCode(keys(1))
+                                done=1;
+                            elseif keyCode(keys(2))
+                                color = 1;
+                                done = 1;
+                            end
+                        end
+                    end
+
+                end
+                
             end
         end
         
@@ -2459,7 +2544,6 @@ classdef Biases < handle
             obj.eyetrack.msg('start_trials');
             WaitSecs(stim_timing_list(1));
             for t = 1:T
-                [stim_type_list(t), stim_timing_list(t+1)]
                 [Ans.resp(t), Ans.rxn(t), Tm.actualStartTime(t), Tm.estStopTime(t)] = obj.auditoryoddball(stim_type_list(t), stim_timing_list(t+1)) ; 
             end
             obj.eyetrack.msg('end_trials');
@@ -2534,7 +2618,7 @@ classdef Biases < handle
                 end
             end
             
-            s4 = 'As a reminder, please look at the x in the middle of the screen and press the space bar as quickly as you can. You can go back to review the tones now if needed.';
+            s4 = 'As a reminder, please look at the cross in the middle of the screen and press the space bar as quickly as you can. You can go back to review the tones now if needed.';
             
             while ~endflag
 
